@@ -29,7 +29,10 @@ import {
   DisasterAlertEvent,
 } from '../types/disaster';
 
-const API_BASE_RAW = import.meta.env.VITE_API_BASE_URL || '';
+let API_BASE_RAW = import.meta.env.VITE_API_BASE_URL || 'https://disastra-backend.onrender.com';
+if (API_BASE_RAW.includes('localhost') || API_BASE_RAW.includes('loca.lt')) {
+  API_BASE_RAW = 'https://disastra-backend.onrender.com';
+}
 const API_BASE = API_BASE_RAW.endsWith('/') ? API_BASE_RAW.slice(0, -1) : API_BASE_RAW;
 
 // Cache for the latest real disaster analysis to feed Gemini
@@ -116,8 +119,11 @@ export const disastraApi = {
       // Cache for the AI Situation Brief to use
       cachedDisasterContext = data;
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Flood Analysis Error:', error);
+      if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+        throw new Error('Connectivity failure: The backend server is unreachable. It may be asleep or blocking the request via CORS.');
+      }
       throw new Error(error instanceof Error ? error.message : 'Network or server error');
     }
   },
