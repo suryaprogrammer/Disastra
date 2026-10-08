@@ -34,9 +34,6 @@ import {
 import { mockActiveCyclones } from './data/mockCyclone';
 import { mockFloodZones } from './data/mockFlood';
 import {
-  mockRiskIndices,
-  mockAutonomousAgents,
-  mockSituationBrief,
   mockOverviewStats,
 } from './data/mockRisk';
 import { mockAlertTimeline } from './data/mockAlerts';
@@ -49,6 +46,7 @@ export default function App() {
   const [brief, setBrief] = useState<SituationBrief | null>(null);
   const [overviewStats, setOverviewStats] = useState<DisasterOverviewStats | null>(null);
   const [alerts, setAlerts] = useState<DisasterAlertEvent[]>([]);
+  const [alertsError, setAlertsError] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -82,7 +80,13 @@ export default function App() {
       };
       
       const fetchAlerts = async () => {
-        try { const data = await disastraApi.getAlerts(); setAlerts(data); } catch {}
+        try { 
+          const data = await disastraApi.getAlerts(); 
+          setAlerts(data); 
+          setAlertsError(false);
+        } catch {
+          setAlertsError(true);
+        }
       };
 
       await Promise.allSettled([
@@ -123,7 +127,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans selection:bg-slate-900 selection:text-white">
       {/* Top 3-Zone Navigation Contract */}
-      <TopNavbar onNavigate={scrollToSection} />
+      <TopNavbar 
+        onNavigate={scrollToSection} 
+        activeAlertCount={alerts.length}
+        alertError={alertsError}
+      />
 
       <main className="flex-1 w-full">
         {/* 1. DISASTRA HERO / COMMAND HEADER */}

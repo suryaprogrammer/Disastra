@@ -24,12 +24,13 @@ export const Footer: React.FC = () => {
                 Intelligence APIs
               </div>
               <ul className="space-y-1.5 font-mono text-[11px] text-slate-500">
+                <li><code>GET /api/health</code></li>
                 <li><code>GET /api/weather</code></li>
-                <li><code>GET /api/cyclones</code></li>
-                <li><code>GET /api/flood-risk</code></li>
-                <li><code>POST /api/flood-detection</code></li>
+                <li><code>GET /api/alerts/</code></li>
+                <li><code>POST /api/analyze/flood</code></li>
                 <li><code>POST /api/ai/brief</code></li>
-                <li><code>GET /api/agents/status</code></li>
+                <li><code>GET /api/agent/status</code></li>
+                <li><code>POST /api/agent/cycle</code></li>
               </ul>
             </div>
 

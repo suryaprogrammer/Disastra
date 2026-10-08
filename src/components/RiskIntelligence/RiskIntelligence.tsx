@@ -195,8 +195,8 @@ export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices 
 
                 <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
                   <div className="text-[11px] font-medium text-slate-500 uppercase">Confidence</div>
-                  <div className="mt-1 font-mono text-lg font-bold text-emerald-600">
-                    94.2%
+                  <div className="mt-1 font-mono text-lg font-bold text-slate-700">
+                    N/A
                   </div>
                   <div className="text-[10px] text-slate-400">Ensemble Confidence</div>
                 </div>
@@ -222,12 +222,12 @@ export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices 
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-2">
                 <div className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
                   <FileText className="h-4 w-4 text-slate-600" />
-                  <span>Detection Evidence & Sensor Input</span>
+                  <span>Detection Evidence & Sensor Input (Demo)</span>
                 </div>
                 <ul className="text-xs text-slate-600 space-y-1 font-mono list-disc pl-4">
-                  <li>Radar Runoff Saturation: High (98.2mm/24h)</li>
-                  <li>Tidal Backwater Obstruction: Active (+1.4m)</li>
-                  <li>Infrastructure Vulnerability: 14 Bridges Monitored</li>
+                  <li>Radar Runoff Saturation: N/A</li>
+                  <li>Tidal Backwater Obstruction: N/A</li>
+                  <li>Infrastructure Vulnerability: N/A</li>
                 </ul>
               </div>
             </div>

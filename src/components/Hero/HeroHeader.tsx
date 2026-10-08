@@ -38,22 +38,17 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({ onOpenMap, onViewAlerts 
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 font-medium text-slate-900">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600"></span>
-              </span>
-              SYSTEM OPERATIONAL
+              <Activity className="h-3.5 w-3.5 text-slate-500" />
+              DISASTRA PLATFORM
             </span>
             <span className="hidden text-slate-300 sm:inline" aria-hidden="true">|</span>
             <span className="hidden items-center gap-1 text-slate-600 sm:flex">
               <Radio className="h-3.5 w-3.5 text-slate-500" />
-              Pan-India Monitoring Active (28 States · 8 UTs)
+              Monitoring Interface
             </span>
           </div>
 
           <div className="flex items-center gap-4 font-mono text-slate-500">
-            <span className="hidden md:inline">Doppler Radar & SAR Live Ingestion</span>
-            <span className="text-slate-300" aria-hidden="true">|</span>
             <span className="font-semibold text-slate-800">{currentTime || 'SYNCING CLOCK...'}</span>
           </div>
         </div>
@@ -64,9 +59,7 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({ onOpenMap, onViewAlerts 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl space-y-3">
             <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-600 uppercase">
-              <span>National Early Warning Infrastructure</span>
-              <span aria-hidden="true">·</span>
-              <span className="text-rose-600">Tier-1 Alert Level Active</span>
+              <span>Disaster Early Warning Infrastructure</span>
             </div>
 
             <h1 className="font-display text-5xl font-black tracking-tight text-slate-950 sm:text-6xl md:text-7xl">
@@ -105,17 +98,6 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({ onOpenMap, onViewAlerts 
               </button>
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-slate-500">
-              <span className="flex items-center gap-1">
-                <Activity className="h-3.5 w-3.5 text-blue-600" />
-                <span>2 Active Maritime Systems</span>
-              </span>
-              <span aria-hidden="true">·</span>
-              <span className="flex items-center gap-1">
-                <Layers className="h-3.5 w-3.5 text-amber-600" />
-                <span>14 River Basins Monitored</span>
-              </span>
-            </div>
           </div>
         </div>
       </div>

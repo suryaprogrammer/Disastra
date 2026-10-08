@@ -23,6 +23,19 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
   const [selectedZoneId, setSelectedZoneId] = useState<string>(floodZones[0]?.id || '');
   const [showSegmentationMask, setShowSegmentationMask] = useState(true);
   const [activeView, setActiveView] = useState<'upload' | 'monitored'>('upload');
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
+
   
   // Real Analysis State
   const [analysisResult, setAnalysisResult] = useState<{
@@ -30,16 +43,34 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
     detectionCount: number;
     confidence: number;
     waterAreaRatio: number | null;
-    riskScore: number;
-    severity: string;
+    riskScore: number | null;
+    severity: string | null;
     uploadedImageName?: string;
   } | null>(null);
 
   const currentZone = floodZones.find((z) => z.id === selectedZoneId) || floodZones[0];
 
-  const handleAnalyzeUpload = async (file: File) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/tiff'].includes(file.type)) {
+        setAnalysisError('Unsupported file type. Please upload a JPEG, PNG, or WEBP image.');
+        return;
+      }
+      setSelectedImageFile(file);
+      setAnalysisError(null);
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      setImagePreviewUrl(URL.createObjectURL(file));
+      setAnalysisResult(null);
+    }
+  };
+
+  const handleAnalyzeUpload = async () => {
+    if (!selectedImageFile) return;
+    setIsAnalyzing(true);
+    setAnalysisError(null);
     try {
-      const response = await disastraApi.analyzeFloodImage(file);
+      const response = await disastraApi.analyzeFloodImage(selectedImageFile);
       
       if (response.risk_assessment) {
         // Handle DisasterAnalysisResponse
@@ -65,14 +96,16 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
           detectionCount: response.analysis?.detection_count || 0,
           confidence: maxConf,
           waterAreaRatio: maxArea,
-          riskScore: 0, // Not provided by this endpoint
-          severity: waterDetected ? 'MODERATE' : 'LOW', // Fallback severity
-          uploadedImageName: file.name,
+          riskScore: null,
+          severity: null,
+          uploadedImageName: selectedImageFile?.name,
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      throw err;
+      setAnalysisError(err.message || 'An error occurred during analysis.');
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -156,7 +189,7 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
                   </div>
                   <div>
                     <div className="text-[11px] font-semibold text-slate-500 uppercase">Risk</div>
-                    <div className="font-medium text-slate-900">{analysisResult ? analysisResult.severity : 'Awaiting Analysis'}</div>
+                    <div className="font-medium text-slate-900">{analysisResult ? (analysisResult.severity || 'N/A') : 'Awaiting Analysis'}</div>
                   </div>
                   <div>
                     <div className="text-[11px] font-semibold text-slate-500 uppercase">Evidence</div>
@@ -164,25 +197,42 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
                   </div>
                 </div>
 
-                <div className="mt-6">
+                {analysisError && (
+                  <div className="mt-4 rounded border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
+                    <strong>Error:</strong> {analysisError}
+                  </div>
+                )}
+
+                <div className="mt-6 flex flex-col gap-3">
+                  {imagePreviewUrl && (
+                    <div className="relative aspect-video w-full overflow-hidden rounded-md border border-slate-200 bg-slate-100">
+                      <img src={imagePreviewUrl} alt="Upload preview" className="h-full w-full object-cover" />
+                    </div>
+                  )}
+
                   <input 
                     type="file"
                     id="flood-analysis-input"
                     className="hidden"
                     accept="image/jpeg,image/png,image/webp,image/tiff"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        handleAnalyzeUpload(e.target.files[0]);
-                      }
-                    }}
+                    onChange={handleFileSelect}
                   />
                   <label 
                     htmlFor="flood-analysis-input"
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-slate-800"
+                    className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-50 ${isAnalyzing ? 'opacity-50 pointer-events-none' : ''}`}
                   >
-                    <Activity className="h-4 w-4" />
-                    Analyze Event
+                    <Upload className="h-4 w-4" />
+                    {selectedImageFile ? 'Change Image' : 'Choose Image'}
                   </label>
+
+                  <button 
+                    onClick={handleAnalyzeUpload}
+                    disabled={!selectedImageFile || isAnalyzing}
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Activity className={`h-4 w-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
+                    {isAnalyzing ? 'Analyzing...' : 'Analyze Event'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -253,23 +303,25 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
                       ? 'border-rose-200 bg-rose-50/50' 
                       : analysisResult.severity === 'MODERATE'
                       ? 'border-amber-200 bg-amber-50/50'
+                      : analysisResult.severity === null
+                      ? 'border-slate-200 bg-slate-50/50'
                       : 'border-emerald-200 bg-emerald-50/50'
                   }`}>
                     <div className={`flex items-center justify-between text-xs font-semibold ${
-                      analysisResult.severity === 'CRITICAL' || analysisResult.severity === 'HIGH' ? 'text-rose-900' : analysisResult.severity === 'MODERATE' ? 'text-amber-900' : 'text-emerald-900'
+                      analysisResult.severity === 'CRITICAL' || analysisResult.severity === 'HIGH' ? 'text-rose-900' : analysisResult.severity === 'MODERATE' ? 'text-amber-900' : analysisResult.severity === null ? 'text-slate-900' : 'text-emerald-900'
                     }`}>
                       <span className="flex items-center gap-1.5">
                         <AlertTriangle className={`h-4 w-4 ${
-                          analysisResult.severity === 'CRITICAL' || analysisResult.severity === 'HIGH' ? 'text-rose-600' : analysisResult.severity === 'MODERATE' ? 'text-amber-600' : 'text-emerald-600'
+                          analysisResult.severity === 'CRITICAL' || analysisResult.severity === 'HIGH' ? 'text-rose-600' : analysisResult.severity === 'MODERATE' ? 'text-amber-600' : analysisResult.severity === null ? 'text-slate-600' : 'text-emerald-600'
                         }`} />
-                        <span>SEVERITY ASSIGNMENT: {analysisResult.severity}</span>
+                        <span>SEVERITY ASSIGNMENT: {analysisResult.severity || 'N/A'}</span>
                       </span>
-                      <span className="font-mono text-[10px] font-bold">RISK SCORE: {analysisResult.riskScore}</span>
+                      <span className="font-mono text-[10px] font-bold">RISK SCORE: {analysisResult.riskScore !== null ? analysisResult.riskScore : 'N/A'}</span>
                     </div>
                     <p className={`text-xs leading-relaxed ${
-                      analysisResult.severity === 'CRITICAL' || analysisResult.severity === 'HIGH' ? 'text-rose-800' : analysisResult.severity === 'MODERATE' ? 'text-amber-800' : 'text-emerald-800'
+                      analysisResult.severity === 'CRITICAL' || analysisResult.severity === 'HIGH' ? 'text-rose-800' : analysisResult.severity === 'MODERATE' ? 'text-amber-800' : analysisResult.severity === null ? 'text-slate-800' : 'text-emerald-800'
                     }`}>
-                      Real-time inundation risk computed via YOLO segmentation and deterministic risk engine. Risk score indicates spatial severity.
+                      Real-time inundation risk computed via YOLO segmentation. Multi-hazard risk score indicates spatial severity.
                     </p>
                   </div>
 

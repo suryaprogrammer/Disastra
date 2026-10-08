@@ -231,7 +231,12 @@ export const disastraApi = {
     });
 
     if (!res.ok) {
-      throw new Error(`AI brief fetch failed: ${res.statusText}`);
+      let errDetail = res.statusText;
+      try {
+        const errorJson = await res.json();
+        if (errorJson.detail) errDetail = errorJson.detail;
+      } catch (e) {}
+      throw new Error(errDetail);
     }
 
     const aiRes = await res.json();

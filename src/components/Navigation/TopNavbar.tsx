@@ -3,9 +3,11 @@ import { ShieldAlert, Compass, Radio } from 'lucide-react';
 
 interface TopNavbarProps {
   onNavigate: (sectionId: string) => void;
+  activeAlertCount?: number;
+  alertError?: boolean;
 }
 
-export const TopNavbar: React.FC<TopNavbarProps> = ({ onNavigate }) => {
+export const TopNavbar: React.FC<TopNavbarProps> = ({ onNavigate, activeAlertCount, alertError }) => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-8">
@@ -62,10 +64,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onNavigate }) => {
           <button
             type="button"
             onClick={() => onNavigate('alert-timeline-section')}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100 transition-colors whitespace-nowrap"
+            className={`inline-flex cursor-pointer items-center gap-1.5 rounded border px-3 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${
+              alertError
+                ? 'border-slate-300 bg-slate-50 text-slate-500 hover:bg-slate-100'
+                : 'border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100'
+            }`}
           >
-            <ShieldAlert className="h-3.5 w-3.5 text-rose-600" />
-            <span>Active Alerts (14)</span>
+            <ShieldAlert className={`h-3.5 w-3.5 ${alertError ? 'text-slate-400' : 'text-rose-600'}`} />
+            <span>Active Alerts {alertError ? '(ERR)' : `(${activeAlertCount || 0})`}</span>
           </button>
 
           <button
