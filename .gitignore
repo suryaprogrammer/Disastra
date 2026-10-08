@@ -1,0 +1,22 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+AI/datasets/
+AI/training/*.ipynb
+AI/training/runs/
+AI/results/
+AI/downloads/
+AI/training_extract/
+AI/temp/
+AI/runs/
+
+# Local training archives
+AI/*.zip

@@ -1,0 +1,142 @@
+{
+  "zip_exists": true,
+  "zip_size": 363022266,
+  "sha256": "899effb7ea19bd51396f78debbfe35adb8503c5e0000530ed58967cbc8e7d251",
+  "hash_match": true,
+  "extracted": true,
+  "inventory": [
+    {
+      "filename": "README.txt",
+      "relative_path": "README.txt",
+      "size": 425,
+      "extension": ".txt"
+    },
+    {
+      "filename": "detector.pt",
+      "relative_path": "artifacts\\detector.pt",
+      "size": 45733813,
+      "extension": ".pt"
+    },
+    {
+      "filename": "ensemble_cone.joblib",
+      "relative_path": "artifacts\\ensemble_cone.joblib",
+      "size": 27099652,
+      "extension": ".joblib"
+    },
+    {
+      "filename": "gru_forecaster.pt",
+      "relative_path": "artifacts\\gru_forecaster.pt",
+      "size": 140844,
+      "extension": ".pt"
+    },
+    {
+      "filename": "intensity_gridsat.pt",
+      "relative_path": "artifacts\\intensity_gridsat.pt",
+      "size": 111355947,
+      "extension": ".pt"
+    },
+    {
+      "filename": "intensity_vision.pt",
+      "relative_path": "artifacts\\intensity_vision.pt",
+      "size": 111355631,
+      "extension": ".pt"
+    },
+    {
+      "filename": "landfall_model.joblib",
+      "relative_path": "artifacts\\landfall_model.joblib",
+      "size": 2009792,
+      "extension": ".joblib"
+    },
+    {
+      "filename": "prediction_models.joblib",
+      "relative_path": "artifacts\\prediction_models.joblib",
+      "size": 3505733,
+      "extension": ".joblib"
+    },
+    {
+      "filename": "scene_classifier.pt",
+      "relative_path": "artifacts\\scene_classifier.pt",
+      "size": 111367983,
+      "extension": ".pt"
+    }
+  ],
+  "model_files": [
+    {
+      "filename": "detector.pt",
+      "relative_path": "artifacts\\detector.pt",
+      "size": 45733813,
+      "extension": ".pt"
+    },
+    {
+      "filename": "gru_forecaster.pt",
+      "relative_path": "artifacts\\gru_forecaster.pt",
+      "size": 140844,
+      "extension": ".pt"
+    },
+    {
+      "filename": "intensity_gridsat.pt",
+      "relative_path": "artifacts\\intensity_gridsat.pt",
+      "size": 111355947,
+      "extension": ".pt"
+    },
+    {
+      "filename": "intensity_vision.pt",
+      "relative_path": "artifacts\\intensity_vision.pt",
+      "size": 111355631,
+      "extension": ".pt"
+    },
+    {
+      "filename": "scene_classifier.pt",
+      "relative_path": "artifacts\\scene_classifier.pt",
+      "size": 111367983,
+      "extension": ".pt"
+    }
+  ],
+  "detector_info": {
+    "detector.pt": {
+      "file": "detector.pt",
+      "is_torch_readable": true,
+      "type": "dict",
+      "framework": "PyTorch custom dict (state_dict only)",
+      "ultralytics_compatible": false,
+      "error": null,
+      "classes": null
+    },
+    "gru_forecaster.pt": {
+      "file": "gru_forecaster.pt",
+      "is_torch_readable": false,
+      "type": "unknown",
+      "framework": "unknown",
+      "ultralytics_compatible": false,
+      "error": "Weights only load failed. This file can still be loaded, to do so you have two options, \u001b[1mdo those steps only if you trust the source of the checkpoint\u001b[0m. \n\t(1) In PyTorch 2.6, we changed the default value of the `weights_only` argument in `torch.load` from `False` to `True`. Re-running `torch.load` with `weights_only` set to `False` will likely succeed, but it can result in arbitrary code execution. Do it only if you got the file from a trusted source.\n\t(2) Alternatively, to load with `weights_only=True` please check the recommended steps in the following error message.\n\tWeightsUnpickler error: Unsupported global: GLOBAL numpy._core.multiarray._reconstruct was not an allowed global by default. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray._reconstruct])` or the `torch.serialization.safe_globals([numpy._core.multiarray._reconstruct])` context manager to allowlist this global if you trust this class/function.\n\nCheck the documentation of torch.load to learn more about types accepted by default with weights_only https://pytorch.org/docs/stable/generated/torch.load.html.",
+      "classes": null
+    },
+    "intensity_gridsat.pt": {
+      "file": "intensity_gridsat.pt",
+      "is_torch_readable": true,
+      "type": "dict",
+      "framework": "PyTorch custom dict (state_dict only)",
+      "ultralytics_compatible": false,
+      "error": null,
+      "classes": null
+    },
+    "intensity_vision.pt": {
+      "file": "intensity_vision.pt",
+      "is_torch_readable": true,
+      "type": "dict",
+      "framework": "PyTorch custom dict (state_dict only)",
+      "ultralytics_compatible": false,
+      "error": null,
+      "classes": null
+    },
+    "scene_classifier.pt": {
+      "file": "scene_classifier.pt",
+      "is_torch_readable": true,
+      "type": "dict",
+      "framework": "PyTorch custom dict (state_dict only)",
+      "ultralytics_compatible": false,
+      "error": null,
+      "classes": null
+    }
+  }
+}

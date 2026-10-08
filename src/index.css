@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #F8FAFC;
+    color: #0F172A;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.font-display {
+  font-family: 'Cabinet Grotesk', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom fine-line leaflet map styling - Light Enterprise Aesthetic */
+.disastra-map .leaflet-container {
+  background-color: #0f172a !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.disastra-map .leaflet-control-zoom {
+  border: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  overflow: hidden;
+}
+
+.disastra-map .leaflet-control-zoom a {
+  background-color: #ffffff !important;
+  color: #334155 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.disastra-map .leaflet-control-zoom a:hover {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+.disastra-map .leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  backdrop-filter: blur(4px);
+  border-top-left-radius: 4px;
+}
+
+.disastra-map .leaflet-control-attribution a {
+  color: #2563eb !important;
+}
+
+/* Cyclone Rotations (Layered) */
+@keyframes cyclone-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes cyclone-spin-reverse { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+@keyframes cyclone-spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes cyclone-breathe {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+.animate-cyclone-spin { animation: cyclone-spin 6s linear infinite; }
+.animate-cyclone-spin-reverse { animation: cyclone-spin-reverse 8s linear infinite; }
+.animate-cyclone-spin-slow { animation: cyclone-spin-slow 12s linear infinite; }
+.animate-cyclone-breathe { animation: cyclone-breathe 4s ease-in-out infinite; }
+.animate-cyclone-breathe-slow { animation: cyclone-breathe 8s ease-in-out infinite; }
+
+/* Wind Flow */
+@keyframes wind-dash-flow { from { stroke-dashoffset: 64; } to { stroke-dashoffset: 0; } }
+@keyframes wind-dash-flow-reverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 64; } }
+.animate-wind-flow-fast { stroke-dasharray: 4 12; animation: wind-dash-flow 1.5s linear infinite; }
+.animate-wind-flow-med { stroke-dasharray: 8 20; animation: wind-dash-flow 2.5s linear infinite; }
+.animate-wind-flow-slow { stroke-dasharray: 12 32; animation: wind-dash-flow 4s linear infinite; }
+.animate-wind-flow-rev { stroke-dasharray: 6 16; animation: wind-dash-flow-reverse 3s linear infinite; }
+
+/* Radar/Sonar Alert Pulse */
+@keyframes radar-pulse {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.alert-pulse-ring-1 {
+  position: absolute; inset: -6px; border-radius: 50%; border: 2px solid currentColor;
+  animation: radar-pulse 2s cubic-bezier(0.1, 0.7, 1.0, 0.1) infinite; pointer-events: none;
+}
+.alert-pulse-ring-2 {
+  position: absolute; inset: -6px; border-radius: 50%; border: 1.5px solid currentColor;
+  animation: radar-pulse 2s cubic-bezier(0.1, 0.7, 1.0, 0.1) infinite 0.6s; pointer-events: none; opacity: 0;
+}
+.alert-pulse-ring-3 {
+  position: absolute; inset: -6px; border-radius: 50%; border: 1px solid currentColor;
+  animation: radar-pulse 2s cubic-bezier(0.1, 0.7, 1.0, 0.1) infinite 1.2s; pointer-events: none; opacity: 0;
+}
+
+/* Rain Flow */
+@keyframes rain-streak-flow { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
+.animate-rain-fast { stroke-dasharray: 4 12; animation: rain-streak-flow 0.8s linear infinite; }
+.animate-rain-med { stroke-dasharray: 6 16; animation: rain-streak-flow 1.2s linear infinite; }
+.animate-rain-slow { stroke-dasharray: 8 24; animation: rain-streak-flow 2s linear infinite; }
+@keyframes rain-pulse {
+  0% { fill-opacity: 0.15; }
+  50% { fill-opacity: 0.28; }
+  100% { fill-opacity: 0.15; }
+}
+.animate-rain-pulse { animation: rain-pulse 5s ease-in-out infinite; }
+
+/* Flood Flow */
+@keyframes flood-wave-flow { from { stroke-dashoffset: 48; } to { stroke-dashoffset: 0; } }
+@keyframes flood-wave-flow-reverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 48; } }
+.animate-flood-wave-fast { stroke-dasharray: 8 16; animation: flood-wave-flow 2.5s linear infinite; }
+.animate-flood-wave-slow { stroke-dasharray: 12 24; animation: flood-wave-flow 4.5s linear infinite; }
+.animate-flood-wave-rev { stroke-dasharray: 6 20; animation: flood-wave-flow-reverse 6s linear infinite; }
+@keyframes flood-pulse {
+  0% { fill-opacity: 0.18; }
+  50% { fill-opacity: 0.32; }
+  100% { fill-opacity: 0.18; }
+}
+.animate-flood-pulse { animation: flood-pulse 6s ease-in-out infinite; }
+
+/* Trajectory Movement Animation */
+@keyframes track-particle-move {
+  from { stroke-dashoffset: 28; }
+  to { stroke-dashoffset: 0; }
+}
+.animate-track-dash {
+  stroke-dasharray: 6 8;
+  animation: track-particle-move 1.8s linear infinite;
+}
+
+/* Disable heavy animations when reduced motion is requested */
+@media (prefers-reduced-motion: reduce) {
+  .animate-cyclone-spin, .animate-cyclone-spin-reverse, .animate-cyclone-spin-slow,
+  .animate-cyclone-breathe, .animate-cyclone-breathe-slow,
+  .animate-wind-flow-fast, .animate-wind-flow-med, .animate-wind-flow-slow, .animate-wind-flow-rev,
+  .animate-rain-fast, .animate-rain-med, .animate-rain-slow, .animate-rain-pulse,
+  .animate-flood-wave-fast, .animate-flood-wave-slow, .animate-flood-wave-rev, .animate-flood-pulse,
+  .animate-track-dash, .alert-pulse-ring-1, .alert-pulse-ring-2, .alert-pulse-ring-3 {
+    animation: none !important;
+  }
+}
+
+/* Custom Popup Styling */
+.disastra-map .leaflet-popup-content-wrapper {
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 4px 6px -2px rgba(15, 23, 42, 0.05) !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.disastra-map .leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+.disastra-map .leaflet-popup-tip {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px -2px rgba(15, 23, 42, 0.05) !important;
+}
+
+.cursor-crosshair-map {
+  cursor: crosshair;
+}
