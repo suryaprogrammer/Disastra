@@ -229,13 +229,17 @@ export const WeatherBar: React.FC = () => {
               <div className="flex items-center gap-1.5 font-mono text-[11px] text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
                 <span>WEATHER UNAVAILABLE</span>
               </div>
-            ) : weather ? (
+            ) : weather?.mode === 'LIVE' ? (
               <div className="flex items-center gap-1.5 font-mono text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
                 <span>LIVE — OPENWEATHER</span>
+              </div>
+            ) : weather ? (
+              <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-700 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                <span>STATIC DATA</span>
               </div>
             ) : null}
 

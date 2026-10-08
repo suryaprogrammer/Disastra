@@ -95,7 +95,7 @@ export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices 
                   NATIONAL DISASTER RISK SUB-INDICES (DEMO / PREVIEW)
                 </span>
                 <span className="font-mono text-[10px] text-slate-500">
-                  FRONTEND MOCK TELEMETRY
+                  DEMO DATA
                 </span>
               </div>
 

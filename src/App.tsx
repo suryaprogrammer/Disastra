@@ -42,53 +42,60 @@ import {
 import { mockAlertTimeline } from './data/mockAlerts';
 
 export default function App() {
-
-
-  const [cyclones, setCyclones] = useState<CycloneSystem[]>(mockActiveCyclones);
-  const [floodZones, setFloodZones] = useState<FloodZone[]>(mockFloodZones);
-  const [riskIndices, setRiskIndices] = useState<RiskSubIndex[]>(mockRiskIndices);
+  const [cyclones, setCyclones] = useState<CycloneSystem[]>([]);
+  const [floodZones, setFloodZones] = useState<FloodZone[]>([]);
+  const [riskIndices, setRiskIndices] = useState<RiskSubIndex[]>([]);
   const [agentStatus, setAgentStatus] = useState<any>(null);
-  const [brief, setBrief] = useState<SituationBrief>(mockSituationBrief);
-  const [overviewStats, setOverviewStats] = useState<DisasterOverviewStats>(mockOverviewStats);
-  const [alerts, setAlerts] = useState<DisasterAlertEvent[]>(mockAlertTimeline);
+  const [brief, setBrief] = useState<SituationBrief | null>(null);
+  const [overviewStats, setOverviewStats] = useState<DisasterOverviewStats | null>(null);
+  const [alerts, setAlerts] = useState<DisasterAlertEvent[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
 
   // Ingest data via centralized API service
   useEffect(() => {
     async function loadDisasterData() {
-      try {
-        const [
-          cyclonesRes,
-          floodRes,
-          riskRes,
-          agentsRes,
-          briefRes,
-          overviewRes,
-          alertsRes,
-        ] = await Promise.all([
-          disastraApi.getCyclones(),
-          disastraApi.getFloodRisk(),
-          disastraApi.getRiskIndices(),
-          disastraApi.getAgentsStatus(),
-          disastraApi.getSituationBrief(),
-          disastraApi.getOverviewStats(),
-          disastraApi.getAlerts(),
-        ]);
+      // Fetch each data source independently to prevent a single failure from blanking the app
+      
+      const fetchCyclones = async () => {
+        try { const data = await disastraApi.getCyclones(); setCyclones(data); } catch {}
+      };
+      
+      const fetchFloodRisk = async () => {
+        try { const data = await disastraApi.getFloodRisk(); setFloodZones(data); } catch {}
+      };
+      
+      const fetchRiskIndices = async () => {
+        try { const data = await disastraApi.getRiskIndices(); setRiskIndices(data); } catch {}
+      };
+      
+      const fetchAgents = async () => {
+        try { const data = await disastraApi.getAgentsStatus(); setAgentStatus(data); } catch {}
+      };
+      
+      const fetchBrief = async () => {
+        try { const data = await disastraApi.getSituationBrief(); setBrief(data); } catch {}
+      };
+      
+      const fetchOverview = async () => {
+        try { const data = await disastraApi.getOverviewStats(); setOverviewStats(data); } catch {}
+      };
+      
+      const fetchAlerts = async () => {
+        try { const data = await disastraApi.getAlerts(); setAlerts(data); } catch {}
+      };
 
+      await Promise.allSettled([
+        fetchCyclones(),
+        fetchFloodRisk(),
+        fetchRiskIndices(),
+        fetchAgents(),
+        fetchBrief(),
+        fetchOverview(),
+        fetchAlerts(),
+      ]);
 
-        setCyclones(cyclonesRes);
-        setFloodZones(floodRes);
-        setRiskIndices(riskRes);
-        setAgentStatus(agentsRes);
-        setBrief(briefRes);
-        setOverviewStats(overviewRes);
-        setAlerts(alertsRes);
-      } catch (err) {
-        console.warn('Using baseline mock telemetry:', err);
-      } finally {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     }
 
     loadDisasterData();
@@ -137,9 +144,7 @@ export default function App() {
         <WeatherBar />
 
         {/* 11. INDIA DISASTER OVERVIEW (High-density full-width metrics) */}
-        <IndiaOverview stats={overviewStats} />
-
-
+        {overviewStats && <IndiaOverview stats={overviewStats} />}
 
         {/* 5. FLOOD DETECTION PANEL */}
         <FloodDetection floodZones={floodZones} />
@@ -151,7 +156,18 @@ export default function App() {
         <AgentStatus agentStatus={agentStatus} />
 
         {/* 9. GENERATIVE AI SITUATION REPORT */}
-        <AISituationBrief initialBrief={brief} />
+        <AISituationBrief initialBrief={brief || {
+          id: 'awaiting-analysis',
+          headline: 'AWAITING ANALYSIS',
+          executiveSummary: 'Run Flood Analysis to synthesize situation briefing.',
+          keyThreats: [],
+          recommendedActions: [],
+          generatedAt: '-',
+          generatedBy: '-',
+          modelEngine: '-',
+          dataSources: [],
+          confidenceScorePct: 0,
+        }} />
 
         {/* 10. ALERT / EARLY WARNING TIMELINE */}
         <AlertTimeline

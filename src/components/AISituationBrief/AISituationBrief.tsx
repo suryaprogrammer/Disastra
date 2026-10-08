@@ -20,7 +20,9 @@ export const AISituationBrief: React.FC<AISituationBriefProps> = ({ initialBrief
   const [brief, setBrief] = useState<SituationBrief>(initialBrief);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [aiStatus, setAiStatus] = useState<'DEMO / PREVIEW' | 'GENERATING' | 'LIVE — GEMINI' | 'AI UNAVAILABLE'>('DEMO / PREVIEW');
+  const [aiStatus, setAiStatus] = useState<'DEMO / PREVIEW' | 'GENERATING' | 'LIVE — GEMINI' | 'AI UNAVAILABLE' | 'AWAITING ANALYSIS'>(
+    initialBrief.headline === 'AWAITING ANALYSIS' ? 'AWAITING ANALYSIS' : 'DEMO / PREVIEW'
+  );
 
   const handleRefreshBrief = async () => {
     setIsRefreshing(true);

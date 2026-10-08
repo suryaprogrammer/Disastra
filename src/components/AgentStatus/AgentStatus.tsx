@@ -126,20 +126,6 @@ export const AgentStatus: React.FC<AgentStatusProps> = ({ agentStatus: initialAg
         {/* Controls */}
         <div className="mt-6 flex items-center gap-3">
           <button
-            onClick={handleStart}
-            disabled={loadingAction !== null || status === 'MONITORING' || status === 'WAITING'}
-            className="flex items-center gap-2 rounded bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
-          >
-            <Play className="h-4 w-4" /> Start
-          </button>
-          <button
-            onClick={handleStop}
-            disabled={loadingAction !== null || status === 'STOPPED' || status === 'IDLE'}
-            className="flex items-center gap-2 rounded bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50"
-          >
-            <Square className="h-4 w-4" /> Stop
-          </button>
-          <button
             onClick={handleCycle}
             disabled={loadingAction !== null}
             className="flex items-center gap-2 rounded bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50"

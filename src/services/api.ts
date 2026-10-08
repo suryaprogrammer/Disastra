@@ -31,12 +31,6 @@ import {
 
 const API_BASE_RAW = import.meta.env.VITE_API_BASE_URL || '';
 const API_BASE = API_BASE_RAW.endsWith('/') ? API_BASE_RAW.slice(0, -1) : API_BASE_RAW;
-const USE_REAL_BACKEND = Boolean(API_BASE);
-
-// Helper to simulate asynchronous latency if running in mock mode
-async function mockDelay<T>(data: T, ms = 80): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(data), ms));
-}
 
 // Cache for the latest real disaster analysis to feed Gemini
 let cachedDisasterContext: any = null;
@@ -68,12 +62,13 @@ export const disastraApi = {
    * Retrieve tracked cyclonic systems and trajectory projections
    */
   async getCyclones(): Promise<CycloneSystem[]> {
-    if (USE_REAL_BACKEND) {
+    try {
       const res = await fetch(`${API_BASE}/api/cyclones`);
-      if (!res.ok) throw new Error(`Cyclones fetch failed: ${res.statusText}`);
+      if (!res.ok) return [];
       return res.json();
+    } catch {
+      return [];
     }
-    return mockDelay(mockActiveCyclones);
   },
 
   /**
@@ -81,16 +76,17 @@ export const disastraApi = {
    * Retrieve active flood risk zones and hydrological inundation status
    */
   async getFloodRisk(): Promise<FloodZone[]> {
-    if (USE_REAL_BACKEND) {
+    try {
       const res = await fetch(`${API_BASE}/api/flood-risk`);
-      if (!res.ok) throw new Error(`Flood risk fetch failed: ${res.statusText}`);
+      if (!res.ok) return [];
       return res.json();
+    } catch {
+      return [];
     }
-    return mockDelay(mockFloodZones);
   },
 
   /**
-   * POST /api/analyze/disaster
+   * POST /api/analyze/flood
    * Trigger real YOLOv11 flood segmentation and risk analysis on FastAPI backend
    */
   async analyzeFloodImage(file: File): Promise<any> {
@@ -102,7 +98,6 @@ export const disastraApi = {
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
-        // Note: Do NOT set Content-Type header when sending FormData, fetch handles the boundary automatically
         body: formData,
       });
 
@@ -132,14 +127,19 @@ export const disastraApi = {
    * Retrieve active disaster warnings and chronologically ordered events
    */
   async getAlerts(): Promise<any[]> {
-    if (USE_REAL_BACKEND) {
-      const res = await fetch(`${API_BASE}/api/alerts`);
-      if (!res.ok) throw new Error(`Alerts fetch failed: ${res.statusText}`);
+    try {
+      const res = await fetch(`${API_BASE}/api/alerts/`);
+      if (!res.ok) return [];
       return res.json();
+    } catch {
+      return [];
     }
-    return mockDelay(mockAlertTimeline);
   },
 
+  /**
+   * POST /api/alerts/test
+   * DO NOT USE IN PRODUCTION unless secured
+   */
   async testAlert(): Promise<any> {
     const endpoint = `${API_BASE}/api/alerts/test`;
     const res = await fetch(endpoint, { method: 'POST' });
@@ -191,12 +191,12 @@ export const disastraApi = {
     let weatherData = null;
     let weatherStatus = null;
     try {
-      weatherData = await this.getWeather(19.0760, 72.8777); // default to Mumbai for now
+      weatherData = await this.getWeather(19.0760, 72.8777);
     } catch (e) {
       weatherStatus = "UNAVAILABLE";
     }
 
-    const floodModel = cachedDisasterContext.flood_model;
+    const floodModel = cachedDisasterContext.flood_model || cachedDisasterContext;
     const riskAssessment = cachedDisasterContext.risk_assessment;
 
     const floodContext = floodModel ? {
@@ -205,7 +205,7 @@ export const disastraApi = {
       maximum_confidence: floodModel.detections?.length > 0
         ? Math.max(...floodModel.detections.map((d: any) => d.confidence))
         : 0,
-      water_area_ratio: riskAssessment?.evidence?.water_area_ratio ?? null,
+      water_area_ratio: floodModel.analysis?.water_area_ratio ?? riskAssessment?.evidence?.water_area_ratio ?? null,
       analysis_timestamp: new Date().toISOString()
     } : null;
 
@@ -236,7 +236,6 @@ export const disastraApi = {
 
     const aiRes = await res.json();
 
-    // Map CombinedAIResponse to SituationBrief frontend model
     const sr = aiRes.situation_report;
     const rr = aiRes.response_recommendation;
 
@@ -259,24 +258,27 @@ export const disastraApi = {
    * Retrieve national compound disaster risk sub-indices
    */
   async getRiskIndices(): Promise<RiskSubIndex[]> {
-    if (USE_REAL_BACKEND) {
+    try {
       const res = await fetch(`${API_BASE}/api/risk-indices`);
-      if (!res.ok) throw new Error(`Risk indices fetch failed: ${res.statusText}`);
+      if (!res.ok) return [];
       return res.json();
+    } catch {
+      return [];
     }
-    return mockDelay(mockRiskIndices);
   },
 
   /**
    * GET /api/overview
    * Retrieve high-level national disaster statistics
    */
-  async getOverviewStats(): Promise<DisasterOverviewStats> {
-    if (USE_REAL_BACKEND) {
+  async getOverviewStats(): Promise<DisasterOverviewStats | null> {
+    try {
       const res = await fetch(`${API_BASE}/api/overview`);
-      if (!res.ok) throw new Error(`Overview fetch failed: ${res.statusText}`);
+      if (!res.ok) return null;
       return res.json();
+    } catch {
+      return null;
     }
-    return mockDelay(mockOverviewStats);
   },
 };
+
