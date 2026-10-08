@@ -94,7 +94,7 @@ export const disastraApi = {
    * Trigger real YOLOv11 flood segmentation and risk analysis on FastAPI backend
    */
   async analyzeFloodImage(file: File): Promise<any> {
-    const endpoint = `${API_BASE}/api/analyze/disaster`; // Fallback to local if env missing
+    const endpoint = `${API_BASE}/api/analyze/flood`;
 
     const formData = new FormData();
     formData.append('file', file);

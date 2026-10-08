@@ -40,17 +40,36 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
   const handleAnalyzeUpload = async (file: File) => {
     try {
       const response = await disastraApi.analyzeFloodImage(file);
-      const risk = response.risk_assessment;
       
-      setAnalysisResult({
-        waterDetected: risk.risk_assessment.water_detected,
-        detectionCount: risk.evidence.detection_count,
-        confidence: risk.evidence.maximum_confidence || 0,
-        waterAreaRatio: risk.evidence.water_area_ratio || 0,
-        riskScore: risk.risk_assessment.risk_score,
-        severity: risk.risk_assessment.risk_level,
-        uploadedImageName: file.name,
-      });
+      if (response.risk_assessment) {
+        // Handle DisasterAnalysisResponse
+        const risk = response.risk_assessment;
+        setAnalysisResult({
+          waterDetected: risk.risk_assessment.water_detected,
+          detectionCount: risk.evidence.detection_count,
+          confidence: risk.evidence.maximum_confidence || 0,
+          waterAreaRatio: risk.evidence.water_area_ratio || 0,
+          riskScore: risk.risk_assessment.risk_score,
+          severity: risk.risk_assessment.risk_level,
+          uploadedImageName: file.name,
+        });
+      } else {
+        // Handle FloodAnalysisResponse
+        const detections = response.detections || [];
+        const maxConf = detections.length > 0 ? Math.max(...detections.map((d: any) => d.confidence)) : 0;
+        const maxArea = detections.length > 0 ? Math.max(...detections.map((d: any) => d.mask_area_ratio || 0)) : 0;
+        const waterDetected = response.analysis?.water_detected || false;
+        
+        setAnalysisResult({
+          waterDetected,
+          detectionCount: response.analysis?.detection_count || 0,
+          confidence: maxConf,
+          waterAreaRatio: maxArea,
+          riskScore: 0, // Not provided by this endpoint
+          severity: waterDetected ? 'MODERATE' : 'LOW', // Fallback severity
+          uploadedImageName: file.name,
+        });
+      }
     } catch (err) {
       console.error(err);
       throw err;
