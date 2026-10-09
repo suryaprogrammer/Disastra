@@ -1,7 +1,5 @@
 import os
-import cv2
 import numpy as np
-import onnxruntime as ort
 from pathlib import Path
 from app.core.config import settings
 
@@ -13,6 +11,9 @@ class FloodModelService:
         self.session = None
         
         try:
+            import cv2
+            import onnxruntime as ort
+            
             # Memory optimization: bound CPU threads to avoid memory spikes
             opts = ort.SessionOptions()
             opts.intra_op_num_threads = 1
@@ -33,6 +34,9 @@ class FloodModelService:
         if self.error:
             raise ValueError(f"Model failed to load on server: {self.error}")
             
+        import cv2
+        import numpy as np
+        
         # Load image directly into OpenCV using numpy
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
