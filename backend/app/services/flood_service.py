@@ -9,18 +9,30 @@ class FloodModelService:
     def __init__(self):
         # Change model path from .pt to .onnx
         self.model_path = str(settings.FLOOD_MODEL_PATH).replace(".pt", ".onnx")
+        self.error = None
+        self.session = None
         
-        # Memory optimization: bound CPU threads to avoid memory spikes
-        opts = ort.SessionOptions()
-        opts.intra_op_num_threads = 1
-        opts.inter_op_num_threads = 1
-        
-        self.session = ort.InferenceSession(self.model_path, sess_options=opts, providers=['CPUExecutionProvider'])
-        self.classes = {0: "water"}
-        self.task = "segment"
-        self.name = Path(self.model_path).name
+        try:
+            # Memory optimization: bound CPU threads to avoid memory spikes
+            opts = ort.SessionOptions()
+            opts.intra_op_num_threads = 1
+            opts.inter_op_num_threads = 1
+            
+            self.session = ort.InferenceSession(self.model_path, sess_options=opts, providers=['CPUExecutionProvider'])
+            self.classes = {0: "water"}
+            self.task = "segment"
+            self.name = Path(self.model_path).name
+        except Exception as e:
+            import traceback
+            self.error = traceback.format_exc()
+            self.name = "error"
+            self.task = "error"
+            self.classes = {}
 
     def analyze_image(self, image_bytes: bytes, filename: str, conf_threshold: float = 0.25) -> dict:
+        if self.error:
+            raise ValueError(f"Model failed to load on server: {self.error}")
+            
         # Load image directly into OpenCV using numpy
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
