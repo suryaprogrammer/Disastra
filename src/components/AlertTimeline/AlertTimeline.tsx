@@ -13,16 +13,22 @@ import {
 import { AlertRecord } from '../../types/disaster';
 import { disastraApi } from '../../services/api';
 
+import { mockAlertTimeline } from '../../data/mockAlerts';
+
 interface AlertTimelineProps {
   initialAlerts: any[];
+  initialError?: boolean;
   onSelectEventLocation?: (coords: [number, number]) => void;
 }
 
 export const AlertTimeline: React.FC<AlertTimelineProps> = ({
   initialAlerts,
+  initialError = false,
   onSelectEventLocation,
 }) => {
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [alerts, setAlerts] = useState<any[]>(initialAlerts);
+  const [fetchError, setFetchError] = useState<boolean>(initialError);
   const [filterSeverity, setFilterSeverity] = useState<string>('ALL');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -31,8 +37,10 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
     try {
       const data = await disastraApi.getAlerts();
       setAlerts(data);
+      setFetchError(false);
     } catch (e) {
       console.error(e);
+      setFetchError(true);
     }
     setIsRefreshing(false);
   };
@@ -48,7 +56,7 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
     }
   };
 
-  const filteredAlerts = alerts.filter((a) => {
+  const filteredAlerts = (isDemoMode ? mockAlertTimeline : alerts).filter((a) => {
     if (filterSeverity === 'ALL') return true;
     // Map severity filter to our new priorities or old categories if mixed
     const severity = a.priority || a.severity;
@@ -89,6 +97,11 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
             <p className="mt-1 text-sm text-slate-600">
               Audit trail of autonomous sensor detections, computer vision confirmations, and dispatched early warnings.
             </p>
+            {isDemoMode && (
+              <div className="mt-2 inline-flex items-center gap-1.5 rounded bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800 border border-rose-300 uppercase tracking-widest">
+                DEMONSTRATION MODE ACTIVE
+              </div>
+            )}
           </div>
 
           {/* Filter & Action Buttons */}
@@ -124,9 +137,28 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
 
         {/* Timeline Stream */}
         <div className="mt-8 relative border-l-2 border-slate-200 pl-6 ml-4 space-y-6">
-          {filteredAlerts.length === 0 && (
+          {!isDemoMode && fetchError && alerts.length === 0 && (
+            <div className="rounded border border-dashed border-rose-300 bg-rose-50/50 p-6 text-center">
+              <AlertTriangle className="mx-auto mb-2 h-6 w-6 text-rose-400" />
+              <h4 className="text-sm font-semibold text-rose-900">Alert Backend Unavailable</h4>
+              <p className="mt-1 text-xs text-rose-500 mb-4">
+                Cannot retrieve live alerts due to a server connection failure.
+              </p>
+              <button
+                onClick={() => setIsDemoMode(true)}
+                className="cursor-pointer rounded bg-rose-200 px-4 py-2 text-xs font-bold text-rose-800 hover:bg-rose-300 transition-colors"
+              >
+                Load Historical Demo Alerts
+              </button>
+            </div>
+          )}
+          {!isDemoMode && !fetchError && filteredAlerts.length === 0 && (
             <div className="text-slate-500 text-sm py-4">No alerts found.</div>
           )}
+          {isDemoMode && filteredAlerts.length === 0 && (
+            <div className="text-slate-500 text-sm py-4">No demo alerts found for this filter.</div>
+          )}
+
           {filteredAlerts.map((evt) => {
             const isNewType = !!evt.alert_id;
             const id = evt.alert_id || evt.id;
@@ -245,9 +277,17 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
           })}
         </div>
 
-        <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-mono text-slate-400">
-          <span>Alerts Endpoints: GET /api/alerts</span>
-          <span>CAP-XML v1.2 Protocol Compliant</span>
+        <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-mono flex-wrap gap-4">
+          <span className="text-slate-400">Alerts Endpoints: GET /api/alerts</span>
+          {isDemoMode && (
+            <button 
+              onClick={() => setIsDemoMode(false)}
+              className="cursor-pointer font-bold text-rose-600 underline"
+            >
+              Turn Off Demo Data
+            </button>
+          )}
+          <span className="text-slate-400">CAP-XML v1.2 Protocol Compliant</span>
         </div>
       </div>
     </section>

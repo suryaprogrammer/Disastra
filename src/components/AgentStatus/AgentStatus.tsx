@@ -16,10 +16,13 @@ interface AgentStatusProps {
 export const AgentStatus: React.FC<AgentStatusProps> = ({ agentStatus: initialAgentStatus }) => {
   const [statusData, setStatusData] = useState<any>(initialAgentStatus);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   useEffect(() => {
-    setStatusData(initialAgentStatus);
-  }, [initialAgentStatus]);
+    if (!isDemoMode) {
+      setStatusData(initialAgentStatus);
+    }
+  }, [initialAgentStatus, isDemoMode]);
 
   const refreshStatus = async () => {
     try {
@@ -63,8 +66,39 @@ export const AgentStatus: React.FC<AgentStatusProps> = ({ agentStatus: initialAg
     setLoadingAction(null);
   };
 
-  const status = statusData?.status || 'IDLE';
-  const state = statusData?.last_cycle;
+  const handleSimulateCycle = () => {
+    setIsDemoMode(true);
+    setStatusData({
+      status: 'MONITORING',
+      last_cycle: {
+        agent_cycle_id: 'SIM-' + Date.now().toString().slice(-6),
+        started_at: new Date().toISOString(),
+        observation_id: 'OBS-DEMO-991',
+        observation_source: 'Satellite Sentinel-2',
+        observation_created_at: new Date().toISOString(),
+        weather_status: 'AVAILABLE',
+        weather_summary: 'Heavy precipitation, high wind speeds',
+        previous_risk_score: 72,
+        current_risk_score: 84,
+        previous_risk_level: 'HIGH',
+        current_risk_level: 'CRITICAL',
+        previous_detection_count: 8,
+        current_detection_count: 14,
+        previous_water_area_ratio: 0.21,
+        current_water_area_ratio: 0.35,
+        change_detected: true,
+        change_reasons: [
+          'Water area ratio increased by > 5%',
+          'Risk level escalated from HIGH to CRITICAL',
+        ],
+        recommended_agent_action: 'PREPARE_ALERT',
+        last_gemini_summary: 'Simulated Demo Analysis: Visual evidence suggests rapid inundation. Immediate escalation recommended.',
+      }
+    });
+  };
+
+  const status = isDemoMode ? 'MONITORING' : (statusData?.status || 'IDLE');
+  const state = isDemoMode ? statusData?.last_cycle : statusData?.last_cycle;
 
   const getStatusBadge = (s: string) => {
     switch (s) {
@@ -127,13 +161,19 @@ export const AgentStatus: React.FC<AgentStatusProps> = ({ agentStatus: initialAg
         <div className="mt-6 flex items-center gap-3">
           <button
             onClick={handleCycle}
-            disabled={loadingAction !== null}
+            disabled={loadingAction !== null || isDemoMode}
             className="flex items-center gap-2 rounded bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50"
           >
-            <RefreshCw className={`h-4 w-4 ${loadingAction === 'cycle' ? 'animate-spin' : ''}`} /> Manual Cycle
+            <RefreshCw className={`h-4 w-4 ${loadingAction === 'cycle' ? 'animate-spin' : ''}`} /> Live Cycle
           </button>
           <button
-            onClick={refreshStatus}
+            onClick={handleSimulateCycle}
+            className="flex items-center gap-2 rounded border border-rose-300 bg-rose-100 px-3 py-1.5 text-sm font-bold text-rose-800 hover:bg-rose-200"
+          >
+            <Play className="h-4 w-4" /> Simulate Agent Cycle
+          </button>
+          <button
+            onClick={() => { setIsDemoMode(false); refreshStatus(); }}
             disabled={loadingAction !== null}
             className="flex items-center gap-2 rounded bg-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-800 hover:bg-slate-300 disabled:opacity-50 ml-auto"
           >
@@ -146,8 +186,13 @@ export const AgentStatus: React.FC<AgentStatusProps> = ({ agentStatus: initialAg
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2 mb-3">
             <div className="flex items-center gap-2">
               <Terminal className="h-4 w-4 text-emerald-400" />
-              <span className="font-mono text-xs font-bold text-white uppercase">
-                AGENT EXECUTION STREAM
+              <span className="font-mono text-xs font-bold text-white uppercase flex items-center gap-2">
+                AGENT EXECUTION STREAM 
+                {isDemoMode && (
+                  <span className="rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] text-rose-400 border border-rose-500/30">
+                    [SIMULATION]
+                  </span>
+                )}
               </span>
             </div>
             <div className="flex items-center gap-3 font-mono text-xs text-slate-400">

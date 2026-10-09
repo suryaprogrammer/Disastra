@@ -27,6 +27,7 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   React.useEffect(() => {
     return () => {
@@ -62,6 +63,7 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
       if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
       setImagePreviewUrl(URL.createObjectURL(file));
       setAnalysisResult(null);
+      setIsDemoMode(false);
     }
   };
 
@@ -106,6 +108,24 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
       setAnalysisError(err.message || 'An error occurred during analysis.');
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleRunDemo = () => {
+    setIsDemoMode(true);
+    setAnalysisError(null);
+    setAnalysisResult({
+      waterDetected: true,
+      detectionCount: 14,
+      confidence: 0.942,
+      waterAreaRatio: 0.315,
+      riskScore: 82,
+      severity: 'HIGH',
+      uploadedImageName: 'demo-flood-image.jpg',
+    });
+    // Set a placeholder image if none selected
+    if (!imagePreviewUrl) {
+      setImagePreviewUrl('/src/assets/images/flood_yolo_segmentation_1791004247840.jpg');
     }
   };
 
@@ -199,7 +219,13 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
 
                 {analysisError && (
                   <div className="mt-4 rounded border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
-                    <strong>Error:</strong> {analysisError}
+                    <div className="mb-2"><strong>Error:</strong> {analysisError}</div>
+                    <button 
+                      onClick={handleRunDemo}
+                      className="cursor-pointer w-full rounded border border-rose-300 bg-rose-100 px-3 py-1.5 font-semibold text-rose-900 hover:bg-rose-200 transition-colors"
+                    >
+                      Run Offline Demonstration
+                    </button>
                   </div>
                 )}
 
@@ -257,9 +283,15 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
                         Source: {analysisResult.uploadedImageName}
                       </p>
                     </div>
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                      Live Result
-                    </span>
+                    {isDemoMode ? (
+                      <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800 border border-amber-300">
+                        DEMONSTRATION MODE
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                        Live Result
+                      </span>
+                    )}
                   </div>
 
                   {/* Specified Fields in User Request: Water Detected, Count, Confidence, Area */}
@@ -325,9 +357,13 @@ export const FloodDetection: React.FC<FloodDetectionProps> = ({ floodZones }) =>
                     </p>
                   </div>
 
-                  <div className="border-t border-slate-100 pt-3 text-[11px] font-mono text-slate-400 flex justify-between">
-                    <span>Target Model Slot: POST /api/analyze/disaster</span>
-                    <span>Status: Live Backend Response</span>
+                  <div className="border-t border-slate-100 pt-3 text-[11px] font-mono flex justify-between">
+                    <span className="text-slate-400">Target Model Slot: POST /api/analyze/disaster</span>
+                    {isDemoMode ? (
+                      <span className="text-amber-600 font-bold">Status: Offline Verification Run</span>
+                    ) : (
+                      <span className="text-emerald-600 font-bold">Status: Live Backend Response</span>
+                    )}
                   </div>
                 </motion.div>
               ) : (

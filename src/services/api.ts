@@ -133,13 +133,9 @@ export const disastraApi = {
    * Retrieve active disaster warnings and chronologically ordered events
    */
   async getAlerts(): Promise<any[]> {
-    try {
-      const res = await fetch(`${API_BASE}/api/alerts/`);
-      if (!res.ok) return [];
-      return res.json();
-    } catch {
-      return [];
-    }
+    const res = await fetch(`${API_BASE}/api/alerts/`);
+    if (!res.ok) throw new Error(`Alerts fetch failed: ${res.statusText}`);
+    return res.json();
   },
 
   /**

@@ -307,6 +307,8 @@ const IndiaMapInner: React.FC<{
     alerts: true,
   });
 
+  const [isDemoMode, setIsDemoMode] = useState(false);
+
   // Dedicated Layer Group References
   const cycloneLayerGroupRef = useRef<L.LayerGroup>(L.layerGroup());
   const floodLayerGroupRef = useRef<L.LayerGroup>(L.layerGroup());
@@ -592,10 +594,11 @@ const IndiaMapInner: React.FC<{
     // ----------------------------------------------------
     // 2. LAYER 2: FLOOD AREAS (FLUID DYNAMICS)
     // ----------------------------------------------------
-    MOCK_FLOOD_POLYGONS.forEach(fPoly => {
-      const levelKey = (fPoly.warningLevel.toUpperCase() in SEVERITY_COLORS) ? fPoly.warningLevel.toUpperCase() as keyof typeof SEVERITY_COLORS : 'MODERATE';
+    if (isDemoMode) {
+      MOCK_FLOOD_POLYGONS.forEach(fPoly => {
+        const levelKey = (fPoly.warningLevel.toUpperCase() in SEVERITY_COLORS) ? fPoly.warningLevel.toUpperCase() as keyof typeof SEVERITY_COLORS : 'MODERATE';
 
-      // Base Inundation Field (Pulsing opacity)
+        // Base Inundation Field (Pulsing opacity)
       const floodPolygon = L.polygon(fPoly.boundary as [number, number][], {
         color: '#0284c7',
         fillColor: '#06b6d4',
@@ -684,15 +687,17 @@ const IndiaMapInner: React.FC<{
         popupDiv.appendChild(btn);
       }
 
-      floodPolygon.bindPopup(popupDiv);
-      floodLayerGroupRef.current.addLayer(floodPolygon);
-    });
+        floodPolygon.bindPopup(popupDiv);
+        floodLayerGroupRef.current.addLayer(floodPolygon);
+      });
+    }
 
     // ----------------------------------------------------
     // 3. LAYER 3: HEAVY RAIN (PRECIPITATION FIELD)
     // ----------------------------------------------------
-    MOCK_HEAVY_RAIN_ZONES.forEach(rain => {
-      const isCritical = rain.intensity === 'CRITICAL';
+    if (isDemoMode) {
+      MOCK_HEAVY_RAIN_ZONES.forEach(rain => {
+        const isCritical = rain.intensity === 'CRITICAL';
       const isHigh = rain.intensity === 'HIGH';
       
       const outerColor = isCritical ? '#6366f1' : isHigh ? '#06b6d4' : '#93c5fd';
@@ -764,15 +769,17 @@ const IndiaMapInner: React.FC<{
       outerPolygon.bindPopup(popupDiv);
       corePolygon.bindPopup(popupDiv);
 
-      rainLayerGroupRef.current.addLayer(outerPolygon);
-      rainLayerGroupRef.current.addLayer(corePolygon);
-    });
+        rainLayerGroupRef.current.addLayer(outerPolygon);
+        rainLayerGroupRef.current.addLayer(corePolygon);
+      });
+    }
 
     // ----------------------------------------------------
     // 4. LAYER 4: WIND DIRECTION (CONTINUOUS ATMOSPHERIC FLOW)
     // ----------------------------------------------------
-    MOCK_WIND_STREAMLINES.forEach((path, idx) => {
-      // Background faint flow
+    if (isDemoMode) {
+      MOCK_WIND_STREAMLINES.forEach((path, idx) => {
+        // Background faint flow
       const flowBg = L.polyline(path, {
         color: '#38bdf8',
         weight: 3,
@@ -806,18 +813,20 @@ const IndiaMapInner: React.FC<{
 
       const arrowMarker = L.marker(endPoint, { icon: arrowIcon, interactive: false });
 
-      windLayerGroupRef.current.addLayer(flowBg);
-      windLayerGroupRef.current.addLayer(flowFg);
-      windLayerGroupRef.current.addLayer(arrowMarker);
-    });
+        windLayerGroupRef.current.addLayer(flowBg);
+        windLayerGroupRef.current.addLayer(flowFg);
+        windLayerGroupRef.current.addLayer(arrowMarker);
+      });
+    }
 
     // ----------------------------------------------------
     // 5. LAYER 5: ALERT MARKERS (RADAR SONAR PULSE)
     // ----------------------------------------------------
-    MOCK_NATIONAL_ALERTS.forEach(alertItem => {
-      const marker = L.marker([alertItem.lat, alertItem.lng], {
-        icon: getAlertPinIcon(alertItem.severity),
-      });
+    if (isDemoMode) {
+      MOCK_NATIONAL_ALERTS.forEach(alertItem => {
+        const marker = L.marker([alertItem.lat, alertItem.lng], {
+          icon: getAlertPinIcon(alertItem.severity),
+        });
 
       const popupDiv = document.createElement('div');
       popupDiv.style.cssText = 'padding: 12px; width: 250px; font-family: inherit;';
@@ -844,11 +853,12 @@ const IndiaMapInner: React.FC<{
         </div>
       `;
 
-      marker.bindPopup(popupDiv);
-      alertLayerGroupRef.current.addLayer(marker);
-    });
+        marker.bindPopup(popupDiv);
+        alertLayerGroupRef.current.addLayer(marker);
+      });
+    }
 
-  }, [cyclones, floodZones, onSelectCyclone, onSelectFlood, shouldReduceMotion]);
+  }, [cyclones, floodZones, onSelectCyclone, onSelectFlood, shouldReduceMotion, isDemoMode]);
 
   const activeCount = Object.values(activeLayers).filter(Boolean).length;
 
@@ -871,9 +881,11 @@ const IndiaMapInner: React.FC<{
             <div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
                 INDIA DISASTER MAP
-                <span className="rounded bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200 uppercase tracking-widest">
-                  DEMO / PREVIEW
-                </span>
+                {isDemoMode && (
+                  <span className="rounded bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800 border border-rose-300 uppercase tracking-widest">
+                    DEMONSTRATION MODE ACTIVE
+                  </span>
+                )}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500">
                 National Disaster Intelligence Command Overview
@@ -905,6 +917,18 @@ const IndiaMapInner: React.FC<{
           <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Map Layers</span>
             <span className="text-[10px] font-mono text-slate-400 font-semibold">{activeCount}/5 On</span>
+          </div>
+          <div className="mb-3 border-b border-slate-100 pb-3">
+            <button
+              onClick={() => setIsDemoMode(!isDemoMode)}
+              className={`w-full cursor-pointer rounded px-2 py-1.5 text-[11px] font-bold transition-colors ${
+                isDemoMode 
+                  ? 'bg-rose-100 text-rose-800 border border-rose-200 hover:bg-rose-200' 
+                  : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200'
+              }`}
+            >
+              {isDemoMode ? 'Turn Off Demo Data' : 'Load Synthetic Demo'}
+            </button>
           </div>
           <div className="space-y-1.5 text-xs">
             <label className="flex items-center justify-between gap-2 text-slate-700 cursor-pointer hover:bg-slate-50 p-1 rounded transition-colors">

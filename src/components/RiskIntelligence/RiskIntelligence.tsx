@@ -12,13 +12,25 @@ import {
   FileText,
 } from 'lucide-react';
 import { RiskSubIndex } from '../../types/disaster';
+import { mockRiskIndices } from '../../data/mockRisk';
 
 interface RiskIntelligenceProps {
   riskIndices: RiskSubIndex[];
 }
 
-export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices }) => {
+export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices: initialRiskIndices }) => {
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const riskIndices = isDemoMode ? mockRiskIndices : initialRiskIndices;
   const [selectedCategory, setSelectedCategory] = useState<string>(riskIndices[0]?.category || '');
+
+  // Reset selected category if risk indices array changes (like toggling demo mode)
+  React.useEffect(() => {
+    if (riskIndices.length > 0) {
+      if (!riskIndices.find(r => r.category === selectedCategory)) {
+        setSelectedCategory(riskIndices[0].category);
+      }
+    }
+  }, [riskIndices, selectedCategory]);
 
   // Discrete segmented block meter
   const renderBlockMeter = (score: number, level: string) => {
@@ -86,16 +98,39 @@ export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices 
         </div>
 
         {/* Index Grid */}
+        {riskIndices.length === 0 ? (
+          <div className="mt-8 flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center">
+            <ShieldAlert className="mb-3 h-8 w-8 text-slate-400" />
+            <h4 className="text-sm font-semibold text-slate-900">Live Risk Indices Unavailable</h4>
+            <p className="mt-1 text-xs text-slate-500 max-w-sm">
+              The neural risk synthesis backend is currently offline. No real-time telemetry available.
+            </p>
+            <button
+              onClick={() => setIsDemoMode(true)}
+              className="mt-4 cursor-pointer rounded bg-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-300 transition-colors"
+            >
+              Load Demo Risk Profile
+            </button>
+          </div>
+        ) : (
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-12">
           {/* Left Table / Scientific Meter Deck (7 cols) */}
           <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-6 lg:col-span-7 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
                 <span className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-700">
-                  NATIONAL DISASTER RISK SUB-INDICES (DEMO / PREVIEW)
+                  NATIONAL DISASTER RISK SUB-INDICES {isDemoMode ? '(DEMO / PREVIEW)' : '(LIVE)'}
                 </span>
-                <span className="font-mono text-[10px] text-slate-500">
-                  DEMO DATA
+                <span className="font-mono text-[10px] text-slate-500 flex items-center gap-2">
+                  {isDemoMode && (
+                    <button 
+                      onClick={() => setIsDemoMode(false)}
+                      className="cursor-pointer font-bold text-rose-600 underline"
+                    >
+                      Turn Off Demo Data
+                    </button>
+                  )}
+                  {isDemoMode ? 'DEMO DATA' : 'LIVE DATA'}
                 </span>
               </div>
 
@@ -160,9 +195,13 @@ export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices 
               </div>
             </div>
 
-            <div className="mt-4 border-t border-slate-200 pt-3 text-[11px] font-mono text-slate-500 flex justify-between">
-              <span>Standard: NDMA Hazard Scoring Matrix v3</span>
-              <span>Demo Data (Backend integration pending)</span>
+            <div className="mt-4 border-t border-slate-200 pt-3 text-[11px] font-mono flex justify-between">
+              <span className="text-slate-500">Standard: NDMA Hazard Scoring Matrix v3</span>
+              {isDemoMode ? (
+                <span className="text-amber-600 font-bold">Demo / Static Data Only</span>
+              ) : (
+                <span className="text-emerald-600 font-bold">Live Synced Data</span>
+              )}
             </div>
           </div>
 
@@ -177,7 +216,7 @@ export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices 
                   </span>
                 </div>
                 <span className="font-mono text-xs font-bold text-slate-900">
-                  Risk Score: {activeIndex?.score}/100
+                  Risk Score: {activeIndex?.score != null ? `${activeIndex.score}/100` : 'N/A'}
                 </span>
               </div>
 
@@ -212,7 +251,7 @@ export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices 
                 <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
                   <div className="text-[11px] font-medium text-slate-500 uppercase">Severity Index</div>
                   <div className="mt-1 font-mono text-lg font-bold text-rose-600">
-                    {activeIndex?.score} / 100
+                    {activeIndex?.score != null ? `${activeIndex.score} / 100` : 'N/A'}
                   </div>
                   <div className="text-[10px] text-slate-400">Multi-factor score</div>
                 </div>
@@ -222,7 +261,7 @@ export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices 
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-2">
                 <div className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
                   <FileText className="h-4 w-4 text-slate-600" />
-                  <span>Detection Evidence & Sensor Input (Demo)</span>
+                  <span>Detection Evidence & Sensor Input {isDemoMode ? '(Demo)' : '(Live)'}</span>
                 </div>
                 <ul className="text-xs text-slate-600 space-y-1 font-mono list-disc pl-4">
                   <li>Radar Runoff Saturation: N/A</li>
@@ -232,11 +271,16 @@ export const RiskIntelligence: React.FC<RiskIntelligenceProps> = ({ riskIndices 
               </div>
             </div>
 
-            <div className="mt-4 border-t border-slate-100 pt-3 text-[11px] text-slate-400 font-mono">
-              Demo / Static Data Only · Architecture ready for FastAPI engine
+            <div className="mt-4 border-t border-slate-100 pt-3 text-[11px] font-mono flex justify-between">
+              {isDemoMode ? (
+                <span className="text-amber-600 font-bold">Demo / Static Data Only</span>
+              ) : (
+                <span className="text-emerald-600 font-bold">Architecture synced with FastAPI engine</span>
+              )}
             </div>
           </div>
         </div>
+        )}
       </div>
     </section>
   );

@@ -180,6 +180,7 @@ export default function App() {
         {/* 10. ALERT / EARLY WARNING TIMELINE */}
         <AlertTimeline
           initialAlerts={alerts}
+          initialError={alertsError}
           onSelectEventLocation={handleEventLocationFocus}
         />
       </main>
