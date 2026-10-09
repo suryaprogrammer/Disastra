@@ -1,6 +1,7 @@
 fastapi==0.115.0
 uvicorn==0.31.0
-ultralytics==8.4.172
+onnxruntime==1.19.2
+opencv-python-headless==4.10.0.84
 python-multipart==0.0.12
 pydantic==2.13.5
 pydantic-settings==2.5.2
